@@ -82,7 +82,7 @@ def upload_context():
 
     conn.commit()
 
-    print("UPLOAD STORED:", meeting_id, name)
+    print(f"✅ UPLOAD STORED | meeting_id={meeting_id} | name={name}")
 
     # 🔥 FIFO cleanup after insert
     fifo_cleanup(conn)
@@ -93,6 +93,35 @@ def upload_context():
     return jsonify({"status": "uploaded"})
 
 
+# =========================
+# 🔍 DEBUG DB (TEMPORARY)
+# =========================
+@app.route("/debug-db", methods=["GET"])
+def debug_db():
+    try:
+        conn = get_conn()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("""
+        SELECT id, meeting_id, name, summary, created_at
+        FROM meetings
+        ORDER BY id DESC
+        LIMIT 10
+        """)
+
+        rows = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "count": len(rows),
+            "data": rows
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 # =========================
 # 🎤 PROCESS SPEECH
 # =========================
