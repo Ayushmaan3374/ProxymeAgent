@@ -92,6 +92,27 @@ def upload_context():
 
     return jsonify({"status": "uploaded"})
 
+# =========================
+# 📋 GET REPRESENTORS
+# =========================
+@app.route("/get-representors", methods=["GET"])
+def get_representors():
+    try:
+        conn = get_conn()
+        cur = conn.cursor()
+
+        cur.execute("SELECT DISTINCT name FROM meetings")
+
+        names = [row[0] for row in cur.fetchall()]
+
+        cur.close()
+        conn.close()
+
+        return jsonify({"names": names})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 
 # =========================
 # 🔍 DEBUG DB (TEMPORARY)
