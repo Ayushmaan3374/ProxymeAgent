@@ -101,9 +101,21 @@ def get_representors():
         conn = get_conn()
         cur = conn.cursor()
 
-        cur.execute("SELECT DISTINCT name FROM meetings")
+        cur.execute("""
+        SELECT meeting_id, name, summary
+        FROM meetings
+        ORDER BY created_at ASC
+        """)
 
-        names = [row[0] for row in cur.fetchall()]
+        rows = cur.fetchall()
+
+        names = []
+        for row in rows:
+            names.append({
+                "meeting_id": row[0],
+                "name": row[1],
+                "used": row[2] is not None   # ✅ summary used or not
+            })
 
         cur.close()
         conn.close()
